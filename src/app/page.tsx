@@ -1,103 +1,186 @@
+'use client';
+
+import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent
+} from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+
+// -------- ACTIONS --------
+const ACTIONS = [
+  { id: "crack",    label: "Crack",     image: "/icons/Crack.jpeg",    blurb: "This is a crack.",     href: "/items/create?code=DC-CK-01&name=Crack&severity=Red" },
+  { id: "flash",    label: "Flash",     image: "/icons/Flash.jpeg",    blurb: "This is a flash.",     href: "/items/create" },
+  { id: "pinhole",  label: "Pin Hole",  image: "/icons/PinHole.jpeg",  blurb: "This is a pin hole.",  href: "/items/create" },
+  { id: "damage",   label: "Damage",    image: "/icons/Damage.jpeg",   blurb: "This is a damage.",    href: "/items/create" },
+  { id: "sink",     label: "Sink",      image: "/icons/Sink.jpeg",     blurb: "This is a sink.",      href: "/items/create" },
+  { id: "scratch",  label: "Scratch",   image: "/icons/Scratch.jpeg",  blurb: "This is a scratch.",   href: "/items/create" },
+  { id: "coldshut", label: "Cold Shut", image: "/icons/ColdShut.jpeg", blurb: "This is a cold shut.", href: "/items/create" },
+  { id: "blister",  label: "Blister",   image: "/icons/Blister.jpeg",  blurb: "This is a blister.",   href: "/items/create" },
+];
+
+// -------- TILE (card, not full-width button) --------
+function Tile({ action, onOpen }: { action: any; onOpen: (a: any) => void }) {
+  const router = useRouter();
+  const handleClick = () => (action.href ? router.push(action.href) : onOpen(action));
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={handleClick}
+      className="cursor-pointer rounded-2xl border bg-white shadow-sm hover:shadow-md transition p-8 flex flex-col items-center justify-center gap-4"
+    >
+      {action.image ? (
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+          src={action.image}
+          alt={action.label}
+          width={96}
+          height={96}
+          className="rounded-full object-cover ring-2 ring-red-300 p-1"
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+      ) : (
+        <div className="w-16 h-16 rounded bg-gray-200" />
+      )}
+      <span className="text-lg font-semibold text-gray-900">{action.label}</span>
+    </motion.div>
+  );
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+export default function Page() {
+  const [query, setQuery] = React.useState("");
+  const [filter, setFilter] = React.useState("all");
+  const [current, setCurrent] = React.useState<any>(null);
+
+  const filtered = ACTIONS.filter(
+    (a) =>
+      (filter === "all" || a.id.startsWith(filter)) &&
+      (query.trim() === "" || a.label.toLowerCase().includes(query.toLowerCase()))
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <h1 className="text-2xl md:text-3xl font-semibold">Icon Demo Launcher</h1>
+          <div className="flex gap-3 w-full md:w-auto">
+            <Input
+              placeholder="Search actions..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="md:w-80"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="s">Starts with 's'</SelectItem>
+                <SelectItem value="d">Starts with 'd'</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <Tabs defaultValue="grid" className="w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+            <TabsTrigger value="grid">Defekts</TabsTrigger>
+            <TabsTrigger value="starred">Starred</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="guide">Guide</TabsTrigger>
+          </TabsList>
+
+          {/* EXACTLY 3 COLUMNS */}
+          <TabsContent value="grid" className="mt-4">
+            <div
+              className="grid gap-6 md:gap-x-10 md:gap-y-12"
+              style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
+            >
+              {filtered.map((a) => (
+                <Tile key={a.id} action={a} onOpen={setCurrent} />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="starred" className="text-sm text-muted-foreground mt-4">
+            Star your favorites in a future iteration.
+          </TabsContent>
+
+          <TabsContent value="settings" className="text-sm text-muted-foreground mt-4">
+            Placeholder settings panel.
+          </TabsContent>
+
+          {/* Guide tab: same 3-column grid, navigate to /guide/:id */}
+          <TabsContent value="guide" className="mt-4">
+            <div
+                className="grid gap-6 md:gap-x-10 md:gap-y-12"
+              style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
+            >
+              {filtered.map((a) => (
+                <Tile key={`guide-${a.id}`} action={{ ...a, href: `/guide/${a.id}` }} onOpen={setCurrent} />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <Card className="rounded-2xl">
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            Tip: Each tile opens a modal describing a possible task.
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dialog: safe header for image tiles */}
+      <Dialog open={!!current} onOpenChange={(open) => !open && setCurrent(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {current?.image ? (
+                <Image src={current.image} alt={current.label} width={20} height={20} className="rounded" />
+              ) : current?.icon ? (
+                React.createElement(current.icon, { className: "w-5 h-5" })
+              ) : null}
+              {current?.label}
+            </DialogTitle>
+            <DialogDescription>{current?.blurb}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="rounded-lg bg-gray-100 p-3">
+              <pre className="whitespace-pre-wrap">{`// TODO: implement ${current?.id}
+// Example: call an API, show progress, and render results.
+await new Promise(r => setTimeout(r, 800)); // fake delay
+return { ok: true };`}</pre>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setCurrent(null)}>Close</Button>
+              <Button onClick={() => alert(`${current?.label} triggered (demo)`)}>Run Demo</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
